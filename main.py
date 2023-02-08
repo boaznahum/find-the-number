@@ -3,6 +3,10 @@
 #  compose of 10 digits
 # each digit in place I species how many times digit I repeat itself
 #
+# History
+# without _sum_by_count # attempts = 16799
+# with _sum_by_count # attempts = 1176
+# Find all - #1428 attempts, find single solution
 
 class Number:
 
@@ -15,13 +19,17 @@ class Number:
         self._hist[0] = 10
         self._sum: int = 0  # number of digits
 
+        # d0 + d1 + d2 ... d9 = count(0)*0 + count(1)*1 + ... count(9) * 9 =
+        #  = d0 * 0 + d1 * 1 ... + d9 * 9
+        self._sum_by_count = 0
+
     def solved(self):
         """
         Check that each digit Di in place i, number of i is Di
         :return:
         """
 
-        if self._sum != 10:  # sum of digits must be 10
+        if not (self._sum == self._sum_by_count == 10):  # sum of digits must be 10
             return False
 
         for (i, d) in enumerate(self._digits):
@@ -31,7 +39,7 @@ class Number:
         return True
 
     def __str__(self) -> str:
-        s = str(self._sum) + "   "
+        s = str(self._sum) + " " + str(self._sum_by_count) + "   "
 
         for (i, d) in enumerate(self._digits):
             s += "[" + str(i) + "]" + str(d) + "/" + str(self._hist[i]) + " "
@@ -65,10 +73,16 @@ class Number:
         hist[prev] -= 1
         self._sum -= prev
 
+        #  = d0 * 0 + d1 * 1 ... + d9 * 9
+        self._sum_by_count -= prev * d_index
+
         # set it
         digits[d_index] = d
         hist[d] += 1
         self._sum += d
+
+        #  = d0 * 0 + d1 * 1 ... + d9 * 9
+        self._sum_by_count += d * d_index
 
         return prev
 
@@ -76,50 +90,74 @@ class Number:
         """
         :return: True if accumulated number of digits > 10
         """
-        return self._sum > 10
+        return self._sum > 10 or self._sum_by_count > 10
 
 
-def rec_solve(n: Number, d_index: int) -> bool:
-    """
+class Solver:
 
-    :param n:
-    :param d_index: index of digit to start with, 0..9
-    :return:
-    """
+    def __init__(self) -> None:
+        super().__init__()
+        self._n: Number = Number()
+        self.attempts = 0
+        self._solutions: list[str] = []
 
-    print(f"Checking @ {d_index} / {n}")
-    if n.solved():
-        return True
+        self._find_all = False
 
-    if d_index == 0:
-        return False  # can't try anymore
+    def _rec_solve(self, d_index: int) -> bool:
+        """
 
-    d_index = d_index - 1
+        :param d_index: index of digit to start with, 0..9
+        :return:
+        """
 
-    prev = n.get_digit(d_index)
-    for d in range(0, 10):
+        n: Number = self._n
 
-        n.set_digit(d_index, d)
+        print(f"Checking @ {d_index} / {n}")
+        if n.solved():
+            self._solutions.append(n.pure_str())
+            return not self._find_all
 
-        if n.exceed():
-            # can't continue
-            n.set_digit(d_index, prev)
-            return False
+        if d_index == 0:
+            return False  # can't try anymore
 
-        if rec_solve(n, d_index):
-            return True
+        d_index = d_index - 1
 
-    n.set_digit(d_index, prev)
-    return False
+        prev = n.get_digit(d_index)
+        for d in range(0, 10):
+
+            n.set_digit(d_index, d)
+            self.attempts += 1
+
+            if n.exceed():
+                # can't continue
+                n.set_digit(d_index, prev)
+                return False
+
+            if self._rec_solve(d_index):
+                return not self._find_all
+
+        n.set_digit(d_index, prev)
+        return False
+
+    def solve(self) -> bool:
+        self._n: Number = Number()
+
+        self._rec_solve(10)
+        return bool(self._solutions)
+
+    @property
+    def solutions(self):
+        return self._solutions
 
 
 def solve():
-    n: Number = Number()
+    s: Solver = Solver()
 
-    solved = rec_solve(n, 10)
+    solved = s.solve()
 
     if solved:
-        print(f"Solved: {solved} : {n.pure_str()}")
+        n = '\n'
+        print(f"Solved: {solved} in {s.attempts} attempts:\n {n.join(s.solutions)}")
     else:
         raise RuntimeError("Unable to solve")
 
