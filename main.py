@@ -104,7 +104,7 @@ class Solver:
         self._solutions: list[str] = []
 
         self._find_all = False
-        self._start_from_right = False
+        self._start_from_right = True
 
     def _rec_solve(self, d_index: int) -> bool:
         """
