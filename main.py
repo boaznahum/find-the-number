@@ -103,12 +103,13 @@ class Solver:
         self.attempts = 0
         self._solutions: list[str] = []
 
-        self._find_all = False
+        self._find_all = True
         self._start_from_right = True
 
     def _rec_solve(self, d_index: int) -> bool:
         """
-
+        Find to find solution
+        Restore n state if return false
         :param d_index: index of digit to start with, 0..9
         :return:
         """
@@ -121,9 +122,9 @@ class Solver:
             self._solutions.append(n.pure_str())
             print(f" *** Found {n}")
             if self._find_all:
-                return False # continue search
+                return False  # continue search
             else:
-                return True # stop search
+                return True  # stop search
 
         if self._start_from_right:
             if d_index == 0:
@@ -140,12 +141,14 @@ class Solver:
             n.set_digit(d_index, d)
 
             if n.exceed():
-                # can't continue
+                # can't continue - too many digits
+                print(f" !!! Exceed @ {d_index} / {n}")
+
                 n.set_digit(d_index, prev)
                 return False
 
-            if self._rec_solve(d_index):
-                return not self._find_all # stop search in not find all
+            if self._rec_solve(d_index):  # never return true if self find_all is true
+                return True
 
         n.set_digit(d_index, prev)
         return False
@@ -153,7 +156,7 @@ class Solver:
     def solve(self) -> bool:
         self._n: Number = Number()
 
-        self._rec_solve( 10 if self._start_from_right else -1)
+        self._rec_solve(10 if self._start_from_right else -1)
         return bool(self._solutions)
 
     @property
