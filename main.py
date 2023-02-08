@@ -4,9 +4,11 @@
 # each digit in place I species how many times digit I repeat itself
 #
 # History
-# without _sum_by_count # attempts = 16799
-# with _sum_by_count # attempts = 1176
+# attempt is checking if number is ok
+# without _sum_by_count # attempts = 12457
+# with _sum_by_count # attempts = 1210  5156 when starting from right
 # Find all - #1428 attempts, find single solution
+
 
 class Number:
 
@@ -102,6 +104,7 @@ class Solver:
         self._solutions: list[str] = []
 
         self._find_all = False
+        self._start_from_right = False
 
     def _rec_solve(self, d_index: int) -> bool:
         """
@@ -112,21 +115,29 @@ class Solver:
 
         n: Number = self._n
 
-        print(f"Checking @ {d_index} / {n}")
+        self.attempts += 1
+        print(f"{self.attempts}] Checking @ {d_index} / {n}")
         if n.solved():
             self._solutions.append(n.pure_str())
-            return not self._find_all
+            print(f" *** Found {n}")
+            if self._find_all:
+                return False # continue search
+            else:
+                return True # stop search
 
-        if d_index == 0:
-            return False  # can't try anymore
-
-        d_index = d_index - 1
+        if self._start_from_right:
+            if d_index == 0:
+                return False  # can't try anymore
+            d_index -= 1
+        else:
+            if d_index == 9:
+                return False  # can't try anymore
+            d_index += 1
 
         prev = n.get_digit(d_index)
         for d in range(0, 10):
 
             n.set_digit(d_index, d)
-            self.attempts += 1
 
             if n.exceed():
                 # can't continue
@@ -134,7 +145,7 @@ class Solver:
                 return False
 
             if self._rec_solve(d_index):
-                return not self._find_all
+                return not self._find_all # stop search in not find all
 
         n.set_digit(d_index, prev)
         return False
@@ -142,7 +153,7 @@ class Solver:
     def solve(self) -> bool:
         self._n: Number = Number()
 
-        self._rec_solve(10)
+        self._rec_solve( 10 if self._start_from_right else -1)
         return bool(self._solutions)
 
     @property
