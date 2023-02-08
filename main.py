@@ -3,7 +3,7 @@
 #  compose of 10 digits
 # each digit in place I species how many times digit I repeat itself
 #
-# History
+# History - without counting exceed, need to fix
 # attempt is checking if number is ok
 # without _sum_by_count # attempts = 12457
 # with _sum_by_count # attempts = 1210  5156 when starting from right
@@ -142,7 +142,8 @@ class Solver:
 
             if n.exceed():
                 # can't continue - too many digits
-                print(f" !!! Exceed @ {d_index} / {n}")
+                self.attempts += 1
+                print(f" !!! {self.attempts}]  Exceed @ {d_index} / {n}")
 
                 n.set_digit(d_index, prev)
                 return False
