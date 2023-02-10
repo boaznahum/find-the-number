@@ -155,7 +155,7 @@ class Solver:
         return False
 
     def solve(self) -> bool:
-        self._n: Number = Number()
+        self._n = Number()
 
         self._rec_solve(10 if self._start_from_right else -1)
         return bool(self._solutions)
@@ -165,7 +165,7 @@ class Solver:
         return self._solutions
 
 
-def solve():
+def solve() -> None:
     s: Solver = Solver()
 
     solved = s.solve()
